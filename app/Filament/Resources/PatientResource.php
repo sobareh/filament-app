@@ -10,8 +10,11 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Infolists\Infolist;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+
+use Filament\Infolists\Components;
 
 class PatientResource extends Resource
 {
@@ -74,11 +77,35 @@ class PatientResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\ViewAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
+            ]);
+    }
+
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist
+            ->schema([
+                Components\Section::make()->schema([
+                    Components\TextEntry::make('name'),
+                    Components\TextEntry::make('type'),
+                    Components\TextEntry::make('date_of_birth')
+                        ->badge()
+                        ->date()
+                        ->color('success'),
+                    ]), 
+                Components\Section::make('Content')
+                    ->schema([
+                        Components\TextEntry::make('owner.name')
+                            ->prose()
+                            ->markdown()
+                            ->hiddenLabel(),
+                    ])
+                    ->collapsible(),
             ]);
     }
 
@@ -95,6 +122,7 @@ class PatientResource extends Resource
             'index' => Pages\ListPatients::route('/'),
             'create' => Pages\CreatePatient::route('/create'),
             'edit' => Pages\EditPatient::route('/{record}/edit'),
+            'view' => Pages\ViewPatient::route('/{record}'),
         ];
     }
 }
